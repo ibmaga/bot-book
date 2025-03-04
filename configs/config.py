@@ -1,27 +1,17 @@
-from environs import Env
-from dataclasses import dataclass
+from functools import lru_cache
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-@dataclass
-class TgBot:
-    token: str
-    admin_ids: list
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
+
+    TOKEN: str
+    ADMIN_IDS: list[int]
 
 
-@dataclass
-class Config:
-    tgbot: TgBot
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
 
 
-def load_config(path: str | None = None) -> Config:
-    env = Env()
-    env.read_env(path)
-
-    config = Config(
-        tgbot=TgBot(
-            token=env('TOKEN'),
-            admin_ids=env('ADMIN_IDS')
-        )
-    )
-
-    return config
+settings = get_settings()
